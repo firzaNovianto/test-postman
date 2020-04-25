@@ -22,6 +22,18 @@ MongoClient.connect(URL, {useNewUrlParser : true, useUnifiedTopology : true}, (e
         )
     })
 
+    app.post('/users',(req, res) => {
+        const {name, age} = req.body
+
+        db.collection("users").insertOne({name,age})
+        .then((resp) => {
+            res.send({
+                idNewUser : resp.insertedId,
+                dataUser : resp.ops[0]
+            }   
+            )
+        })
+        })
  
 
 })
