@@ -14,6 +14,8 @@ MongoClient.connect(URL, {useNewUrlParser : true, useUnifiedTopology : true}, (e
 
     }
 
+    console.log("berhasil konek ke mongodb")
+
     const db = client.db(database)
 
     app.get('/',(req,res) => {
@@ -30,10 +32,81 @@ MongoClient.connect(URL, {useNewUrlParser : true, useUnifiedTopology : true}, (e
             res.send({
                 idNewUser : resp.insertedId,
                 dataUser : resp.ops[0]
-            }   
-            )
+            })
         })
+    })
+
+    //get data berdasarkan nama
+    app.get('/users',(req, res) => {
+        
+
+        db.collection('users').find({name :req.query.name}).toArray()
+        .then((resp) => {
+            // res.send(resp)
+            if(resp.length > 0){
+                return res.send(resp)
+            }
+            res.send({errMessage : "user not found"})
+    })
+    })
+
+    app.get('/findone', (req,res) => {
+        let usia = parseInt(req.query.usia)
+
+        db.collection('users').findOne({age: usia , name: req.query.nama})
+        .then((resp) => {
+            res.send(resp)
         })
+    })
+
+    app.get('/find',(req,res) =>{
+        let age = parseInt(req.query.usia)
+
+        
+
+        db.collection('users').find({age}).toArray()
+        .then((resp) => {
+
+            if(resp.length > 0){
+               return res.send(resp)
+            }
+            res.send({message : 'Not Found'})
+        })
+    })
+
+    //GET ALL USERS
+    app.get('/alluser', (req, res) =>{
+        
+        db.collection('users').find({}).toArray()
+        .then((resp) => {
+            res.send(resp)
+        })
+    })
+
+    //DELETE BY NAME
+    app.delete('/user/:name',(req,res) => {
+        let name = req.params.name
+
+        name = name[0].toUpperCase() + name.slice(1)
+
+        db.collections('users').deleteOne({name})
+        .then((resp) => {
+            res.send(resp)
+        })    
+    })
+
+    app.patch('/user/:name', (req,res) => {
+        let name = req.params.name
+        name = name[0].toUpperCase() + name.slice(1)
+        let newName = req.body.newName
+        
+
+        db.collection('users').updateOne({name}, {$set : {name: newName}})
+        .then((resp) => {
+            res.send(resp)
+        })
+    })
+ 
  
 
 })
